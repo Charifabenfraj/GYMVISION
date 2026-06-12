@@ -1,0 +1,481 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Satisfaction Client - Gym Analytics{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Custom Satisfaction Styling matching Modern Theme */
+    .satisfaction-badge-large {
+        font-size: 3rem;
+        width: 80px;
+        height: 80px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Thèmes spécifiques Satisfaction */
+    .satisfaction-low-theme {
+        color: var(--gym-red);
+        background: #fee2e2;
+    }
+
+    .satisfaction-medium-theme {
+        color: var(--gym-orange);
+        background: #ffedd5;
+    }
+
+    .satisfaction-high-theme {
+        color: #10B981;
+        /* Green specific for high satisfaction */
+        background: #ecfdf5;
+    }
+
+    .bg-gradient-low {
+        background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+    }
+
+    .bg-gradient-medium {
+        background: linear-gradient(135deg, #ffedd5 0%, #fed7aa 100%);
+    }
+
+    .bg-gradient-high {
+        background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
+    }
+
+    /* Progress bars overrides */
+    .progress {
+        background-color: var(--gym-gray-lighter);
+        border-radius: 10px;
+        overflow: hidden;
+    }
+
+    .prob-bar-low {
+        background-color: var(--gym-red);
+    }
+
+    .prob-bar-medium {
+        background-color: var(--gym-orange);
+    }
+
+    .prob-bar-high {
+        background-color: #10B981;
+    }
+
+    /* Factors & Recommendations styling */
+    .factor-item {
+        padding: 15px;
+        margin: 10px 0;
+        border-radius: 12px;
+        background-color: #ffffff;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        border-left: 4px solid var(--gym-gray);
+        transition: all 0.2s ease;
+    }
+
+    .factor-item:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 15px rgba(0, 0, 0, 0.06);
+    }
+
+    .factor-positive {
+        border-left-color: #10B981;
+    }
+
+    .factor-positive .badge {
+        background-color: rgba(16, 185, 129, 0.1) !important;
+        color: #10B981;
+    }
+
+    .factor-negative {
+        border-left-color: var(--gym-red);
+    }
+
+    .factor-negative .badge {
+        background-color: rgba(220, 38, 38, 0.1) !important;
+        color: var(--gym-red);
+    }
+
+    /* Modern Recommendation Cards */
+    .recommendation-card {
+        background: #fff;
+        border-radius: 12px;
+        padding: 15px;
+        margin-bottom: 10px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        display: flex;
+        align-items: flex-start;
+        transition: all 0.2s ease;
+    }
+
+    .recommendation-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
+    }
+
+    .recommendation-icon {
+        background: rgba(59, 130, 246, 0.1);
+        color: #3b82f6;
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 12px;
+        flex-shrink: 0;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Modern Page Header -->
+<div class="page-header text-center">
+    <div class="container">
+        <h1 class="page-title">Analyse <span class="text-gradient">Satisfaction</span></h1>
+        <p class="lead text-muted mx-auto" style="max-width: 600px;">
+            Anticipez les besoins de vos membres grâce à notre IA de prédiction XGBoost.
+        </p>
+        <div class="mt-4">
+            <span class="badge bg-white text-dark shadow-sm px-4 py-2 rounded-pill border">
+                <i class="fas fa-brain me-2 text-primary"></i> Modèle XGBoost Classifier
+            </span>
+        </div>
+    </div>
+</div>
+
+<div class="container pb-5">
+    {% if error %}
+    <div class="alert alert-danger alert-dismissible fade show border-0 shadow-sm mb-4" role="alert">
+        <i class="fas fa-exclamation-circle me-2"></i> {{ error }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    {% endif %}
+
+    <div class="row g-4">
+        <!-- Formulaire de Prédiction -->
+        <div class="col-lg-5">
+            <div class="modern-card h-100">
+                <div class="modern-card-header">
+                    <h5 class="m-0 fw-bold"><i class="fas fa-user-edit me-2 text-primary"></i>Profil Client</h5>
+                </div>
+                <div class="modern-card-body">
+                    <form method="POST" action="{% url 'predict_satisfaction' %}">
+                        {% csrf_token %}
+
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="modern-form-label">Genre</label>
+                                <select class="modern-form-control" name="gender" required>
+                                    <option value="1">Homme</option>
+                                    <option value="0">Femme</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="modern-form-label">Âge</label>
+                                <input type="number" class="modern-form-control" name="Age" min="18" max="80" value="35"
+                                    required>
+                            </div>
+
+                            <div class="col-12">
+                                <label class="modern-form-label">Abonnement</label>
+                                <select class="modern-form-control" name="abonoment_type" required>
+                                    <option value="1">Premium</option>
+                                    <option value="0">Standard</option>
+                                </select>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="modern-form-label"><i class="fas fa-calendar-alt text-muted"></i>
+                                    Visites/sem</label>
+                                <input type="number" class="modern-form-control" name="visit_per_week" min="1" max="7"
+                                    value="3" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="modern-form-label"><i class="fas fa-clock text-muted"></i> Durée
+                                    (min)</label>
+                                <input type="number" class="modern-form-control" name="avg_time_in_gym" min="10"
+                                    max="180" value="90" required>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="modern-form-label"><i class="fas fa-sign-in-alt text-muted"></i> Arrivée
+                                    (h)</label>
+                                <input type="number" class="modern-form-control" name="avg_time_check_in" min="6"
+                                    max="23" value="17" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="modern-form-label"><i class="fas fa-sign-out-alt text-muted"></i> Départ
+                                    (h)</label>
+                                <input type="number" class="modern-form-control" name="avg_time_check_out" min="7"
+                                    max="24" value="19" required>
+                            </div>
+                        </div>
+
+                        <hr class="my-4 text-muted">
+
+                        <h6 class="modern-form-label mb-3">Services Utilisés</h6>
+                        <div class="d-flex flex-wrap gap-3 mb-3">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" name="attend_group_lesson" value="1"
+                                    id="groupLesson" checked>
+                                <label class="form-check-label" for="groupLesson">Cours</label>
+                                <!-- Hidden input for unchecked state managed by JS below -->
+                            </div>
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" name="personal_training" value="1"
+                                    id="personalTraining" checked>
+                                <label class="form-check-label" for="personalTraining">Coach</label>
+                            </div>
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" name="drink_abo" value="1" id="drinkAbo"
+                                    checked>
+                                <label class="form-check-label" for="drinkAbo">Boissons</label>
+                            </div>
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" name="uses_sauna" value="1" id="sauna"
+                                    checked>
+                                <label class="form-check-label" for="sauna">Sauna</label>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="modern-form-label">Cours Préférés (Optionnel)</label>
+                            <input type="text" class="modern-form-control" name="fav_group_lesson"
+                                placeholder="Ex: Yoga, BodyPump, Zumba..."
+                                value="{{ request.POST.fav_group_lesson|default:'' }}">
+                        </div>
+
+                        <div class="d-grid mt-4">
+                            <button type="submit" class="btn-modern btn-modern-primary">
+                                <i class="fas fa-search-plus me-2"></i> Analyser Satisfaction
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Résultats & Analyse -->
+        <div class="col-lg-7">
+            {% if prediction_made %}
+
+            <!-- Carte Résultat Principal -->
+            <div class="modern-card border-0 mb-4 position-relative overflow-hidden" data-aos="fade-left">
+                <!-- Background decorative blob based on logic -->
+
+                <div class="modern-card-body position-relative">
+                    <div class="d-flex align-items-center mb-4">
+                        <div
+                            class="satisfaction-badge-large me-4 
+                            {% if satisfaction_class == 2 %}satisfaction-high-theme{% elif satisfaction_class == 1 %}satisfaction-medium-theme{% else %}satisfaction-low-theme{% endif %}">
+                            <span class="fw-bold">{{ satisfaction_score|floatformat:1 }}</span>
+                        </div>
+                        <div>
+                            <h6 class="text-uppercase text-muted letter-spacing-1 mb-1">Score de Satisfaction</h6>
+                            <h2
+                                class="fw-bold mb-0 {% if satisfaction_class == 2 %}text-success{% elif satisfaction_class == 1 %}text-warning{% else %}text-danger{% endif %}">
+                                {% if satisfaction_class == 2 %}
+                                Très Satisfait
+                                {% elif satisfaction_class == 1 %}
+                                Moyennement Satisfait
+                                {% else %}
+                                Peu Satisfait
+                                {% endif %}
+                            </h2>
+                        </div>
+                    </div>
+
+                    <!-- XGBoost Probabilities -->
+                    {% if xgboost_probas %}
+                    <div class="mb-4 p-3 rounded-3 bg-gray-50 border">
+                        <h6 class="fw-bold text-dark mb-3"><i class="fas fa-chart-pie me-2"></i>Probabilités XGBoost
+                        </h6>
+                        <div class="row g-2 align-items-end" style="height: 100px;">
+                            <div class="col text-center">
+                                <div class="progress mb-2 rounded-pill flex-column-reverse"
+                                    style="height: 60px; background: transparent;">
+                                    <div class="progress-bar prob-bar-low js-progress-height" role="progressbar"
+                                        data-height="{{ xgboost_probas.low|default:0|floatformat:0 }}%"
+                                        style="width: 100%;"></div>
+                                </div>
+                                <small class="fw-bold text-danger">Low</small>
+                                <div class="small text-muted">{{ xgboost_probas.low|default:0|floatformat:0 }}%</div>
+                            </div>
+                            <div class="col text-center">
+                                <div class="progress mb-2 rounded-pill flex-column-reverse"
+                                    style="height: 60px; background: transparent;">
+                                    <div class="progress-bar prob-bar-medium js-progress-height" role="progressbar"
+                                        data-height="{{ xgboost_probas.medium|default:0|floatformat:0 }}%"
+                                        style="width: 100%;"></div>
+                                </div>
+                                <small class="fw-bold text-warning">Medium</small>
+                                <div class="small text-muted">{{ xgboost_probas.medium|default:0|floatformat:0 }}%</div>
+                            </div>
+                            <div class="col text-center">
+                                <div class="progress mb-2 rounded-pill flex-column-reverse"
+                                    style="height: 60px; background: transparent;">
+                                    <div class="progress-bar prob-bar-high js-progress-height" role="progressbar"
+                                        data-height="{{ xgboost_probas.high|default:0|floatformat:0 }}%"
+                                        style="width: 100%;"></div>
+                                </div>
+                                <small class="fw-bold text-success">High</small>
+                                <div class="small text-muted">{{ xgboost_probas.high|default:0|floatformat:0 }}%</div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3 mb-md-0">
+                            <h6 class="fw-bold mb-3"><i class="fas fa-lightbulb me-2 text-warning"></i>Facteurs Clés
+                            </h6>
+                            <div class="d-flex flex-column gap-2">
+                                {% if influential_factors %}
+                                {% for factor in influential_factors %}
+                                <div
+                                    class="factor-item {% if factor.impact > 0 %}factor-positive{% else %}factor-negative{% endif %} d-flex justify-content-between align-items-center">
+                                    <div class="d-flex align-items-center">
+                                        <div class="rounded-circle d-flex align-items-center justify-content-center me-3 {% if factor.impact > 0 %}bg-green-soft{% else %}bg-red-soft{% endif %}"
+                                            style="width: 24px; height: 24px;">
+                                            <i class="fas {% if factor.impact > 0 %}fa-arrow-up text-success{% else %}fa-arrow-down text-danger{% endif %}"
+                                                style="font-size: 0.7rem;"></i>
+                                        </div>
+                                        <span class="small fw-bold text-dark">{{ factor.name }}</span>
+                                    </div>
+                                    <span class="badge rounded-pill">
+                                        {% if factor.impact > 0 %}+{% endif %}{{ factor.impact|floatformat:1 }}
+                                    </span>
+                                </div>
+                                {% endfor %}
+                                {% else %}
+                                <p class="text-muted small">Aucun facteur majeur détecté.</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="fw-bold mb-3"><i class="fas fa-bullseye me-2 text-primary"></i>Recommandations
+                            </h6>
+                            <div class="d-flex flex-column">
+                                {% for rec in recommendations %}
+                                <div class="recommendation-card">
+                                    <div class="recommendation-icon">
+                                        <i class="fas fa-check"></i>
+                                    </div>
+                                    <div>
+                                        <span class="text-dark small fw-bold d-block mb-1">Action Recommandée</span>
+                                        <span class="text-secondary small">{{ rec }}</span>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recommandations ML de Cours -->
+            {% if has_course_recommendations and course_recommendations %}
+            <div class="modern-card border-0">
+                <div class="modern-card-header bg-transparent">
+                    <h6 class="m-0 fw-bold text-dark"><i class="fas fa-dumbbell me-2 text-primary"></i>Cours Suggérés
+                        (Machine Learning)</h6>
+                </div>
+                <div class="modern-card-body">
+                    <div class="row g-3">
+                        {% for course in course_recommendations %}
+                        <div class="col-md-6">
+                            <div
+                                class="bg-white p-3 rounded-3 shadow-sm h-100 position-relative overflow-hidden group-course-card border">
+                                <div class="d-flex align-items-start">
+                                    <div class="flex-shrink-0">
+                                        <div class="rounded-circle bg-gray-100 p-3 text-dark">
+                                            <i class="fas fa-dumbbell fa-lg"></i>
+                                        </div>
+                                    </div>
+                                    <div class="ms-3 flex-grow-1">
+                                        <div class="d-flex justify-content-between align-items-center mb-1">
+                                            <h6 class="fw-bold text-dark mb-0">{{ course.name }}</h6>
+                                            <span class="badge bg-success bg-opacity-10 text-success rounded-pill">
+                                                {{ course.score }}% Match
+                                            </span>
+                                        </div>
+                                        <p class="text-muted small mb-2 text-truncate-2">{{ course.reason }}</p>
+                                        <div class="progress" style="height: 4px;">
+                                            <div class="progress-bar bg-success" role="progressbar"
+                                                style="width: {{ course.score }}%"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    <p class="text-center mt-3 mb-0 text-muted small">
+                        <i class="fas fa-info-circle me-1"></i> Basé sur la similarité avec d'autres profils
+                        clients.
+                    </p>
+                </div>
+            </div>
+            {% endif %}
+
+            {% else %}
+            <!-- État Initial -->
+            <div class="modern-card text-center py-5">
+                <div class="modern-card-body">
+                    <div class="mb-4">
+                        <div class="d-inline-flex align-items-center justify-content-center bg-gray-100 rounded-circle"
+                            style="width: 100px; height: 100px;">
+                            <i class="fas fa-robot fa-3x text-muted"></i>
+                        </div>
+                    </div>
+                    <h4>I.A. de Satisfaction</h4>
+                    <p class="text-muted mx-auto" style="max-width: 400px;">
+                        Remplissez le formulaire pour obtenir une prédiction précise basée sur notre algorithme
+                        XGBoost
+                        entraîné sur des milliers de profils.
+                    </p>
+                </div>
+            </div>
+            {% endif %}
+
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // 1. Checkbox handling (ensure 0 is sent if unchecked)
+        const form = document.querySelector('form');
+        const checkboxes = form.querySelectorAll('input[type="checkbox"]');
+
+        form.addEventListener('submit', function (e) {
+            checkboxes.forEach(function (checkbox) {
+                if (!checkbox.checked) {
+                    // Create hidden input or simply rely on server not receiving it (depending on view logic)
+                    // Since view logic handles missing keys or specific values, adding hidden inputs is safer:
+                    const hiddenInput = document.createElement('input');
+                    hiddenInput.type = 'hidden';
+                    hiddenInput.name = checkbox.name;
+                    hiddenInput.value = '0';
+                    form.appendChild(hiddenInput);
+                }
+            });
+        });
+
+        // 2. Vertical Progress Bars Animation (Height instead of Width)
+        document.querySelectorAll('.js-progress-height').forEach(function (bar) {
+            setTimeout(function () {
+                bar.style.height = bar.getAttribute('data-height');
+            }, 200);
+        });
+    });
+</script>
+{% endblock %}

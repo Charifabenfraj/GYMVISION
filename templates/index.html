@@ -1,0 +1,178 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<!-- Hero Section -->
+<div class="hero-section">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6" data-aos="fade-right">
+                <div class="hero-content">
+                    <h1 class="hero-title">
+                        Bienvenue sur <span class="text-gradient">GYMVISION</span>
+                    </h1>
+                    <p class="hero-subtitle">
+                        Plateforme d'Intelligence Artificielle pour révolutionner la gestion de votre salle de sport
+                    </p>
+                    <div class="hero-badges">
+                        <span class="hero-badge"><i class="fas fa-brain"></i> Machine Learning</span>
+                        <span class="hero-badge"><i class="fas fa-chart-line"></i> Analytics</span>
+                        <span class="hero-badge"><i class="fas fa-robot"></i> AI-Powered</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6" data-aos="fade-left">
+                <div class="hero-image">
+                    <div class="floating-card">
+                        <i class="fas fa-dumbbell fa-3x text-orange"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Stats Section -->
+<div class="stats-section">
+    <div class="container">
+        <div class="row g-4">
+            <div class="col-md-3 col-6" data-aos="fade-up" data-aos-delay="0">
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-microchip"></i>
+                    </div>
+                    <h3 class="stat-number">3</h3>
+                    <p class="stat-label">Modèles IA</p>
+                </div>
+            </div>
+            <div class="col-md-3 col-6" data-aos="fade-up" data-aos-delay="100">
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-percentage"></i>
+                    </div>
+                    <h3 class="stat-number">95%</h3>
+                    <p class="stat-label">Précision</p>
+                </div>
+            </div>
+            <div class="col-md-3 col-6" data-aos="fade-up" data-aos-delay="200">
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <h3 class="stat-number">4</h3>
+                    <p class="stat-label">Segments</p>
+                </div>
+            </div>
+            <div class="col-md-3 col-6" data-aos="fade-up" data-aos-delay="300">
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-star"></i>
+                    </div>
+                    <h3 class="stat-number">24/7</h3>
+                    <p class="stat-label">Support</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Features Section -->
+<div class="features-section">
+    <div class="container">
+        <div class="section-header text-center mb-5" data-aos="fade-up">
+            <h2 class="section-title">Nos Solutions <span class="text-gradient">Intelligence Artificielle</span></h2>
+            <p class="section-subtitle">Des outils puissants pour optimiser votre business fitness</p>
+        </div>
+
+        <div class="row g-4">
+            <!-- Churn Prediction Card -->
+            <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="0">
+                <div class="feature-card feature-card-red">
+                    <div class="feature-icon">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <h3 class="feature-title">Prédiction du Churn</h3>
+                    <p class="feature-description">
+                        Identifiez les membres à risque d'abandon et mettez en place des stratégies de rétention personnalisées.
+                    </p>
+                    <div class="feature-tech">
+                        <span class="tech-badge">Logistic Regression</span>
+                        <span class="tech-badge">Random Forest</span>
+                        <span class="tech-badge">XGBoost</span>
+                    </div>
+                    <a href="{% url 'predict_churn' %}" class="feature-btn btn-red">
+                        <span>Analyser maintenant</span>
+                        <i class="fas fa-arrow-right"></i>
+                    </a>
+                    <div class="feature-overlay"></div>
+                </div>
+            </div>
+
+            <!-- Clustering Card -->
+            <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="100">
+                <div class="feature-card feature-card-orange">
+                    <div class="feature-icon">
+                        <i class="fas fa-users-cog"></i>
+                    </div>
+                    <h3 class="feature-title">Segmentation Client</h3>
+                    <p class="feature-description">
+                        Découvrez les profils types de vos membres pour personnaliser votre offre et maximiser l'engagement.
+                    </p>
+                    <div class="feature-tech">
+                        <span class="tech-badge">K-Means</span>
+                        <span class="tech-badge">DBSCAN</span>
+                        <span class="tech-badge">Hierarchical</span>
+                    </div>
+                    <a href="{% url 'predict_clustering' %}" class="feature-btn btn-orange">
+                        <span>Segmenter les clients</span>
+                        <i class="fas fa-arrow-right"></i>
+                    </a>
+                    <div class="feature-overlay"></div>
+                </div>
+            </div>
+
+            <!-- Satisfaction Card -->
+            <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="200">
+                <div class="feature-card feature-card-gradient">
+                    <div class="feature-icon">
+                        <i class="fas fa-star"></i>
+                    </div>
+                    <h3 class="feature-title">Analyse de Satisfaction</h3>
+                    <p class="feature-description">
+                        Mesurez et prédisez la satisfaction de vos membres pour améliorer continuellement votre service.
+                    </p>
+                    <div class="feature-tech">
+                        <span class="tech-badge">XGBoost</span>
+                        <span class="tech-badge">SVM</span>
+                        <span class="tech-badge">Decision Tree</span>
+                    </div>
+                    <a href="{% url 'predict_satisfaction' %}" class="feature-btn btn-gradient">
+                        <span>Évaluer la satisfaction</span>
+                        <i class="fas fa-arrow-right"></i>
+                    </a>
+                    <div class="feature-overlay"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- CTA Section -->
+<div class="cta-section" data-aos="fade-up">
+    <div class="container">
+        <div class="cta-card">
+            <div class="row align-items-center">
+                <div class="col-lg-8">
+                    <h2 class="cta-title">Prêt à transformer votre salle de sport ?</h2>
+                    <p class="cta-text">Commencez dès maintenant à utiliser nos outils d'IA pour améliorer vos performances</p>
+                </div>
+                <div class="col-lg-4 text-lg-end">
+                    <a href="#" class="cta-button">
+                        <span>Démarrer gratuitement</span>
+                        <i class="fas fa-rocket"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

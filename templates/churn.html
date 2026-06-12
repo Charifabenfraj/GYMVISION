@@ -1,0 +1,315 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<!-- Modern Page Header -->
+<div class="page-header text-center">
+    <div class="container">
+        <h1 class="page-title">Prédiction du <span class="text-gradient">Churn</span></h1>
+        <p class="lead text-muted mx-auto" style="max-width: 600px;">
+            Analysez le comportement de vos clients et anticipez les risques de départ grâce à notre IA.
+        </p>
+    </div>
+</div>
+
+<div class="container pb-5">
+    <div class="row g-4">
+        <!-- Formulaire Section -->
+        <div class="col-lg-10 mx-auto">
+            <div class="modern-card">
+                <div class="modern-card-header">
+                    <h4 class="m-0 fw-bold"><i class="fas fa-sliders-h me-2 text-danger"></i>Paramètres de l'analyse
+                    </h4>
+                    <span class="badge bg-danger bg-opacity-10 text-danger px-3 py-2 rounded-pill">Model: XGBoost</span>
+                </div>
+
+                <div class="modern-card-body">
+                    {% if error %}
+                    <div class="alert alert-danger alert-dismissible fade show border-0 shadow-sm" role="alert">
+                        <i class="fas fa-exclamation-circle me-2"></i> {{ error }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                    {% endif %}
+
+                    <form method="post" novalidate>
+                        {% csrf_token %}
+
+                        <!-- Section 1: Profil -->
+                        <h5 class="text-secondary fw-bold mb-4 d-flex align-items-center">
+                            <span
+                                class="bg-danger text-white rounded-circle d-inline-flex align-items-center justify-content-center me-2"
+                                style="width: 30px; height: 30px; font-size: 0.8rem;">1</span>
+                            Profil Client
+                        </h5>
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-4">
+                                <label class="modern-form-label">Genre</label>
+                                <select name="gender" class="modern-form-control">
+                                    <option value="0">Femme</option>
+                                    <option value="1" selected>Homme</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="modern-form-label">Âge</label>
+                                <input type="number" name="Age" class="modern-form-control" value="35" min="12" max="80"
+                                    required>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="modern-form-label">Abonnement</label>
+                                <select name="abonoment_type" class="modern-form-control">
+                                    <option value="0">Standard</option>
+                                    <option value="1" selected>Premium</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Section 2: Fréquentation -->
+                        <h5 class="text-secondary fw-bold mb-4 d-flex align-items-center">
+                            <span
+                                class="bg-danger text-white rounded-circle d-inline-flex align-items-center justify-content-center me-2"
+                                style="width: 30px; height: 30px; font-size: 0.8rem;">2</span>
+                            Habitudes
+                        </h5>
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <label class="modern-form-label">Visites / Semaine</label>
+                                <input type="number" name="visit_per_week" class="modern-form-control" value="3" min="1"
+                                    max="7" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="modern-form-label">Temps Moyen (min)</label>
+                                <div class="input-icon-wrapper">
+                                    <input type="number" name="avg_time_in_gym" class="modern-form-control with-icon"
+                                        value="90" min="10" max="180" required>
+                                    <i class="fas fa-clock input-icon"></i>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="modern-form-label">Heure Arrivée</label>
+                                <input type="number" name="avg_time_check_in" class="modern-form-control" value="17"
+                                    min="6" max="23" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="modern-form-label">Heure Départ</label>
+                                <input type="number" name="avg_time_check_out" class="modern-form-control" value="19"
+                                    min="8" max="24" required>
+                            </div>
+                            <div class="col-md-12">
+                                <label class="modern-form-label">Jours / Semaine</label>
+                                <input type="number" name="days_per_week" class="modern-form-control" value="3" min="1"
+                                    max="7" required>
+                            </div>
+                        </div>
+
+                        <!-- Section 3: Services -->
+                        <h5 class="text-secondary fw-bold mb-4 d-flex align-items-center">
+                            <span
+                                class="bg-danger text-white rounded-circle d-inline-flex align-items-center justify-content-center me-2"
+                                style="width: 30px; height: 30px; font-size: 0.8rem;">3</span>
+                            Services Additionnels
+                        </h5>
+                        <div class="row g-3 mb-4 ps-2">
+                            <div class="col-md-6">
+                                <div class="form-check form-switch custom-switch">
+                                    <input class="form-check-input" type="checkbox" id="group_lesson"
+                                        name="attend_group_lesson" value="1" checked>
+                                    <label class="form-check-label fw-bold" for="group_lesson">Cours Collectifs</label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-check form-switch custom-switch">
+                                    <input class="form-check-input" type="checkbox" id="personal_training"
+                                        name="personal_training" value="1" checked>
+                                    <label class="form-check-label fw-bold" for="personal_training">Coach
+                                        Personnel</label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-check form-switch custom-switch">
+                                    <input class="form-check-input" type="checkbox" id="drink_abo" name="drink_abo"
+                                        value="1" checked>
+                                    <label class="form-check-label fw-bold" for="drink_abo">Abonnement Boissons</label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-check form-switch custom-switch">
+                                    <input class="form-check-input" type="checkbox" id="uses_sauna" name="uses_sauna"
+                                        value="1" checked>
+                                    <label class="form-check-label fw-bold" for="uses_sauna">Accès Sauna</label>
+                                </div>
+                            </div>
+
+                            <!-- Hidden inputs for unchecked checkboxes (Django logic often needs this if handling raw POST or ensure view handles missing keys) -->
+                            <!-- NOTE: Standard Django forms handle unchecked checkboxes by absence. If view expects "1" or "0", might need JS or logic. Assuming view handles it. -->
+                        </div>
+
+                        <div class="d-grid mt-5">
+                            <button type="submit" class="btn-modern btn-modern-primary w-100">
+                                <i class="fas fa-search me-2"></i> Lancer l'analyse
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Résultats Section -->
+        {% if prediction is not None %}
+        <!-- WIDER COLUMN for Modern Result -->
+        <div class="col-lg-10 mx-auto" data-aos="fade-up">
+            <div class="modern-card border-0 shadow-lg overflow-hidden">
+                <div class="row g-0">
+                    <!-- STATUS SECTION (Left Side) -->
+                    <div
+                        class="col-lg-5 position-relative d-flex flex-column align-items-center justify-content-center p-5 border-end-lg-1">
+                        <!-- Background Decoration -->
+                        <div
+                            class="position-absolute top-0 start-0 w-100 h-100 opacity-10 {% if prediction == 1 %}bg-gradient-risk{% else %}bg-gradient-safe{% endif %}">
+                        </div>
+
+                        {% if prediction == 1 %}
+                        <!-- CHURN RISK -->
+                        <div class="position-relative mb-4">
+                            <div class="d-flex align-items-center justify-content-center bg-white rounded-circle shadow-sm"
+                                style="width: 120px; height: 120px;">
+                                <span class="display-5 fw-bold text-danger">{{ probability|floatformat:0 }}<span
+                                        class="fs-4">%</span></span>
+                            </div>
+                            <div
+                                class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger border border-2 border-white p-2">
+                                <i class="fas fa-exclamation-triangle text-white"></i>
+                            </div>
+                        </div>
+                        <h2 class="fw-bold mb-2 p-3 text-center" style="color: var(--gym-red);">Risque de Churn</h2>
+                        <p class="text-secondary text-center mb-0 px-4">
+                            Ce client présente une forte probabilité de départ. Action requise.
+                        </p>
+                        {% else %}
+                        <!-- LOYAL CLIENT -->
+                        <div class="position-relative mb-4">
+                            <div class="d-flex align-items-center justify-content-center bg-white rounded-circle shadow-sm"
+                                style="width: 120px; height: 120px;">
+                                <span class="display-5 fw-bold text-success">{{ probability|floatformat:0 }}<span
+                                        class="fs-4">%</span></span>
+                            </div>
+                            <div
+                                class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-success border border-2 border-white p-2">
+                                <i class="fas fa-check text-white"></i>
+                            </div>
+                        </div>
+                        <h2 class="fw-bold text-success mb-2 text-center">Client Fidèle</h2>
+                        <p class="text-secondary text-center mb-0 px-4">
+                            Ce client est engagé et fiable. Risque de départ très faible.
+                        </p>
+                        {% endif %}
+                    </div>
+
+                    <!-- RECOMMENDATIONS SECTION (Right Side) -->
+                    <div class="col-lg-7 bg-light bg-opacity-25 p-5">
+                        <h5 class="fw-bold text-dark mb-4 d-flex align-items-center">
+                            <i class="fas fa-robot me-2 text-primary"></i> Recommandations IA
+                        </h5>
+
+                        <div class="row g-3">
+                            {% if prediction == 1 %}
+                            <div class="col-12">
+                                <div
+                                    class="bg-white p-4 rounded-3 shadow-sm border-start border-4 border-danger h-100 transition-hover">
+                                    <div class="d-flex">
+                                        <div class="flex-shrink-0 mt-1">
+                                            <i
+                                                class="fas fa-phone-alt text-danger bg-danger bg-opacity-10 p-2 rounded-circle"></i>
+                                        </div>
+                                        <div class="ms-3">
+                                            <h6 class="fw-bold text-dark mb-1">Intervention Rapide</h6>
+                                            <p class="text-muted small mb-0">Planifiez un appel de courtoisie dans les
+                                                24h pour discuter des objectifs et freins.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div
+                                    class="bg-white p-4 rounded-3 shadow-sm border-start border-4 border-danger h-100 transition-hover">
+                                    <div class="d-flex">
+                                        <div class="flex-shrink-0 mt-1">
+                                            <i
+                                                class="fas fa-gift text-danger bg-danger bg-opacity-10 p-2 rounded-circle"></i>
+                                        </div>
+                                        <div class="ms-3">
+                                            <h6 class="fw-bold text-dark mb-1">Offre de Rétention</h6>
+                                            <p class="text-muted small mb-0">Proposez 1 mois de coaching offert ou une
+                                                extension d'abonnement.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% else %}
+                            <div class="col-12">
+                                <div
+                                    class="bg-white p-4 rounded-3 shadow-sm border-start border-4 border-success h-100 transition-hover">
+                                    <div class="d-flex">
+                                        <div class="flex-shrink-0 mt-1">
+                                            <i
+                                                class="fas fa-users text-success bg-success bg-opacity-10 p-2 rounded-circle"></i>
+                                        </div>
+                                        <div class="ms-3">
+                                            <h6 class="fw-bold text-dark mb-1">Ambassadeur</h6>
+                                            <p class="text-muted small mb-0">Invitez ce client au programme de
+                                                parrainage VIP.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div
+                                    class="bg-white p-4 rounded-3 shadow-sm border-start border-4 border-success h-100 transition-hover">
+                                    <div class="d-flex">
+                                        <div class="flex-shrink-0 mt-1">
+                                            <i
+                                                class="fas fa-gem text-success bg-success bg-opacity-10 p-2 rounded-circle"></i>
+                                        </div>
+                                        <div class="ms-3">
+                                            <h6 class="fw-bold text-dark mb-1">Upsell Premium</h6>
+                                            <p class="text-muted small mb-0">Suggérez des services additionnels
+                                                (Nutrition, Spa).</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<style>
+    /* Custom switch styling */
+    .form-check-input:checked {
+        background-color: var(--gym-red);
+        border-color: var(--gym-red);
+    }
+
+    .form-check-input:focus {
+        border-color: var(--gym-red-light);
+        box-shadow: 0 0 0 0.25rem rgba(220, 38, 38, 0.25);
+    }
+
+    /* Animation for result card */
+    @keyframes slideUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+</style>
+{% endblock %}
